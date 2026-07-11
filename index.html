@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ExecPilot — AI Command Center for Executives</title>
+<meta name="description" content="Recipe-driven AI for executives. Bring your own model — Claude, OpenAI, OpenRouter, ZenMux, or fully local Ollama. Connect internal MCP tool servers for live business data." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --primary: #006080;
+    --primary-hover: #00516C;
+    --primary-press: #00435A;
+    --bg: #EAF4F8;
+    --surface: #F4FAFC;
+    --border: #CFE4EC;
+    --tint: #D9EDF4;
+    --text: #0F2E38;
+    --muted: #4A6B77;
+    --success: #1E7F4F;
+    --warning: #9A6B00;
+    --error: #B3402E;
+    --radius: 14px;
+    --shadow: 0 8px 24px rgba(0,96,128,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: "Bricolage Grotesque", "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, h4 { font-weight: 800; color: var(--text); letter-spacing: -0.02em; }
+  a { color: var(--primary); text-decoration: none; }
+  img, svg { display: block; max-width: 100%; }
+  .container { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  section { padding: 96px 0; }
+  .muted { color: var(--muted); }
+  .center { text-align: center; }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 12px; font-weight: 600; color: var(--primary);
+    background: var(--tint); border: 1px solid var(--border);
+    padding: 6px 14px; border-radius: 999px; margin-bottom: 20px;
+  }
+  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); }
+
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: inherit; font-weight: 600; font-size: 15px;
+    padding: 13px 26px; border-radius: 10px; cursor: pointer;
+    border: none; transition: all .15s ease;
+  }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,96,128,0.25); }
+  .btn-ghost { background: var(--surface); color: var(--primary); border: 1.5px solid var(--border); }
+  .btn-ghost:hover { border-color: var(--primary); }
+  .btn-lg { padding: 16px 32px; font-size: 16px; }
+
+  /* ---------- NAV ---------- */
+  header {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(234, 244, 248, 0.85);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  nav.container {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 24px;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 20px; color: var(--primary); }
+  .logo .mark {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: var(--primary); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 800;
+  }
+  .logo span.thin { font-weight: 300; color: var(--text); }
+  .nav-links { display: flex; gap: 28px; align-items: center; }
+  .nav-links a { font-weight: 600; font-size: 14px; color: var(--text); }
+  .nav-links a:hover { color: var(--primary); }
+  .nav-cta { display: flex; gap: 12px; }
+  .burger { display: none; background: none; border: none; font-size: 24px; color: var(--primary); cursor: pointer; }
+
+  /* ---------- HERO ---------- */
+  .hero { padding: 90px 0 60px; position: relative; overflow: hidden; }
+  .hero::before {
+    content: ""; position: absolute; top: -200px; right: -200px;
+    width: 560px; height: 560px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,96,128,0.10), transparent 70%);
+  }
+  .hero-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 60px; align-items: center; position: relative; z-index: 1; }
+  .hero h1 { font-size: 52px; line-height: 1.08; margin-bottom: 22px; }
+  .hero h1 .accent { color: var(--primary); }
+  .hero p.lead { font-size: 18px; color: var(--muted); font-weight: 300; margin-bottom: 32px; max-width: 520px; }
+  .hero-actions { display: flex; gap: 14px; margin-bottom: 28px; flex-wrap: wrap; }
+  .hero-note { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .hero-note svg { width: 16px; height: 16px; color: var(--success); flex-shrink: 0; }
+
+  .mock-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 20px; transform: rotate(1deg);
+  }
+  .mock-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .mock-title { font-weight: 800; color: var(--primary); font-size: 15px; }
+  .mock-badge { font-size: 10px; font-weight: 600; background: var(--tint); color: var(--primary); padding: 3px 9px; border-radius: 20px; }
+  .mock-recipe {
+    background: var(--bg); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 8px; font-size: 13px; font-weight: 600;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .mock-recipe .tag { font-size: 10px; font-weight: 600; color: var(--muted); background: var(--tint); padding: 2px 8px; border-radius: 20px; }
+  .mock-out {
+    margin-top: 14px; background: var(--bg); border: 1px dashed var(--border);
+    border-radius: 10px; padding: 12px 14px; font-size: 12px; color: var(--muted); font-weight: 300;
+  }
+  .mock-out strong { color: var(--text); font-weight: 600; }
+  .typing-dot { display:inline-block; width:6px; height:6px; background: var(--primary); border-radius:50%; margin-left:4px; animation: blink 1.2s infinite; }
+  @keyframes blink { 0%,100%{opacity:.2} 50%{opacity:1} }
+
+  /* ---------- PROVIDER STRIP ---------- */
+  .strip { padding: 36px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); background: var(--surface); }
+  .strip .container { display: flex; align-items: center; justify-content: center; gap: 48px; flex-wrap: wrap; }
+  .strip-label { font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-right: 12px; }
+  .provider-chip { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; color: var(--text); opacity: 0.75; }
+  .provider-chip .swatch { width: 10px; height: 10px; border-radius: 3px; background: var(--primary); }
+
+  /* ---------- SECTION HEADS ---------- */
+  .section-head { max-width: 680px; margin: 0 auto 56px; text-align: center; }
+  .section-head h2 { font-size: 36px; margin-bottom: 14px; }
+  .section-head p { color: var(--muted); font-size: 16px; font-weight: 300; }
+
+  /* ---------- FEATURE GRID ---------- */
+  .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .feature-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 28px; transition: box-shadow .2s, transform .2s;
+  }
+  .feature-card:hover { box-shadow: var(--shadow); transform: translateY(-3px); }
+  .feature-icon {
+    width: 44px; height: 44px; border-radius: 10px; background: var(--tint);
+    display: flex; align-items: center; justify-content: center; font-size: 22px; margin-bottom: 16px;
+  }
+  .feature-card h3 { font-size: 17px; margin-bottom: 8px; }
+  .feature-card p { font-size: 14px; color: var(--muted); font-weight: 300; }
+
+  /* ---------- HOW IT WORKS ---------- */
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; position: relative; }
+  .step { text-align: center; position: relative; }
+  .step-num {
+    width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-weight: 800; margin: 0 auto 16px;
+    font-size: 16px;
+  }
+  .step h4 { font-size: 15px; margin-bottom: 6px; }
+  .step p { font-size: 13px; color: var(--muted); font-weight: 300; }
+
+  /* ---------- MCP SECTION ---------- */
+  .mcp-section { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .mcp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .mcp-grid h2 { font-size: 32px; margin-bottom: 18px; }
+  .mcp-grid p.body { color: var(--muted); font-weight: 300; font-size: 15.5px; margin-bottom: 20px; }
+  .mcp-flow { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
+  .flow-step { display: flex; gap: 14px; align-items: flex-start; padding: 12px 0; border-bottom: 1px dashed var(--border); }
+  .flow-step:last-child { border-bottom: none; }
+  .flow-icon {
+    width: 34px; height: 34px; border-radius: 8px; background: var(--tint); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 16px;
+  }
+  .flow-step h5 { font-size: 13.5px; font-weight: 600; margin-bottom: 2px; }
+  .flow-step p { font-size: 12.5px; color: var(--muted); font-weight: 300; }
+  .flow-step .bubble {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 12px; font-size: 12.5px; font-weight: 600; color: var(--primary); display: inline-block;
+  }
+  .mcp-points { list-style: none; margin-top: 8px; }
+  .mcp-points li { display: flex; gap: 10px; margin-bottom: 14px; font-size: 14.5px; }
+  .mcp-points li svg { width: 20px; height: 20px; color: var(--success); flex-shrink: 0; margin-top: 2px; }
+  .mcp-points strong { font-weight: 600; }
+  .mcp-points span.d { color: var(--muted); font-weight: 300; font-size: 13.5px; display: block; }
+
+  /* ---------- RECIPE PACKS ---------- */
+  .packs-tabs { display: flex; gap: 10px; justify-content: center; margin-bottom: 36px; flex-wrap: wrap; }
+  .pack-tab {
+    font-family: inherit; font-weight: 600; font-size: 13px; padding: 8px 18px; border-radius: 999px;
+    background: var(--surface); border: 1px solid var(--border); color: var(--muted); cursor: pointer;
+  }
+  .pack-tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .pack-panel { display: none; }
+  .pack-panel.active { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .pack-item {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 16px 18px; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .pack-item .emoji { font-size: 20px; }
+  .pack-item h5 { font-size: 14px; margin-bottom: 3px; }
+  .pack-item p { font-size: 12.5px; color: var(--muted); font-weight: 300; }
+
+  /* ---------- PRIVACY SECTION ---------- */
+  .privacy-section { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+  .privacy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
+  .privacy-grid h2 { font-size: 32px; margin-bottom: 18px; }
+  .privacy-list { list-style: none; }
+  .privacy-list li { display: flex; gap: 12px; margin-bottom: 18px; font-size: 15px; }
+  .privacy-list li svg { width: 22px; height: 22px; color: var(--success); flex-shrink: 0; margin-top: 1px; }
+  .privacy-list strong { display: block; margin-bottom: 2px; }
+  .privacy-list span.desc { color: var(--muted); font-size: 13.5px; font-weight: 300; }
+
+  .tier-card { background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+  .tier-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .tier-row:last-child { border-bottom: none; }
+  .tier-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+  .tier-dot.local { background: var(--error); }
+  .tier-dot.approved { background: var(--warning); }
+  .tier-dot.general { background: var(--success); }
+  .tier-row div h5 { font-size: 13.5px; font-weight: 600; }
+  .tier-row div p { font-size: 12px; color: var(--muted); font-weight: 300; }
+
+  /* ---------- OLLAMA SETUP / CORS ---------- */
+  .setup-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+  .setup-tab {
+    font-family: inherit; font-weight: 600; font-size: 13px; padding: 8px 18px; border-radius: 999px;
+    background: var(--surface); border: 1px solid var(--border); color: var(--muted); cursor: pointer;
+  }
+  .setup-tab.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .setup-panel { display: none; }
+  .setup-panel.active { display: block; }
+  .setup-panel p.note { font-size: 13.5px; color: var(--muted); font-weight: 300; margin-bottom: 12px; }
+  .code-block {
+    background: #0F2E38; color: #D9EDF4; border-radius: 10px; padding: 16px 18px;
+    font-family: Consolas, "Courier New", monospace; font-size: 13px; line-height: 1.7;
+    overflow-x: auto; position: relative; margin-bottom: 12px; white-space: pre;
+  }
+  .code-block .cmt { color: #6E96A5; }
+  .copy-code {
+    position: absolute; top: 10px; right: 10px; font-family: "Bricolage Grotesque", sans-serif;
+    font-size: 11px; font-weight: 600; background: rgba(255,255,255,0.1); color: #D9EDF4;
+    border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; padding: 4px 10px; cursor: pointer;
+  }
+  .copy-code:hover { background: rgba(255,255,255,0.2); }
+  .setup-warn {
+    background: #FFF7E6; border: 1px solid #EAD9A8; color: var(--warning);
+    font-size: 13px; font-weight: 600; padding: 10px 14px; border-radius: 8px; margin-top: 8px;
+  }
+
+  /* ---------- PRICING ---------- */
+  .pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: stretch; }
+  .price-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 32px 28px; display: flex; flex-direction: column;
+  }
+  .price-card.featured { border: 2px solid var(--primary); box-shadow: var(--shadow); position: relative; }
+  .featured-badge {
+    position: absolute; top: -13px; left: 50%; transform: translateX(-50%);
+    background: var(--primary); color: #fff; font-size: 11px; font-weight: 700;
+    padding: 4px 14px; border-radius: 999px;
+  }
+  .price-card h3 { font-size: 18px; margin-bottom: 6px; }
+  .price-card .price { font-size: 38px; font-weight: 800; color: var(--primary); margin: 12px 0 4px; }
+  .price-card .price span { font-size: 14px; font-weight: 400; color: var(--muted); }
+  .price-card .price-desc { font-size: 13px; color: var(--muted); margin-bottom: 22px; }
+  .price-list { list-style: none; margin-bottom: 28px; flex-grow: 1; }
+  .price-list li { font-size: 13.5px; padding: 8px 0; display: flex; gap: 8px; border-bottom: 1px solid var(--border); }
+  .price-list li:last-child { border: none; }
+  .price-list li svg { width: 16px; height: 16px; color: var(--success); flex-shrink: 0; margin-top: 2px; }
+
+  /* ---------- FAQ ---------- */
+  .faq-item { border-bottom: 1px solid var(--border); padding: 20px 0; }
+  .faq-q { display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-weight: 600; font-size: 15.5px; }
+  .faq-q .plus { font-size: 20px; color: var(--primary); transition: transform .2s; }
+  .faq-item.open .plus { transform: rotate(45deg); }
+  .faq-a { max-height: 0; overflow: hidden; transition: max-height .25s ease; font-size: 14px; color: var(--muted); font-weight: 300; }
+  .faq-item.open .faq-a { max-height: 240px; padding-top: 12px; }
+
+  /* ---------- FINAL CTA ---------- */
+  .cta-band {
+    background: var(--primary); border-radius: 24px; padding: 64px 48px; text-align: center;
+    margin: 0 24px; color: #fff; position: relative; overflow: hidden;
+  }
+  .cta-band::before {
+    content: ""; position: absolute; width: 400px; height: 400px; border-radius: 50%;
+    background: rgba(255,255,255,0.06); top: -150px; left: -100px;
+  }
+  .cta-band h2 { color: #fff; font-size: 32px; margin-bottom: 12px; position: relative; }
+  .cta-band p { color: rgba(255,255,255,0.85); font-weight: 300; margin-bottom: 30px; position: relative; }
+  .cta-band .btn-primary { background: #fff; color: var(--primary); }
+  .cta-band .btn-primary:hover { background: #eef8fb; }
+  .cta-band .btn-ghost { background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.3); }
+
+  /* ---------- FOOTER ---------- */
+  footer { padding: 56px 0 30px; }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 32px; margin-bottom: 40px; }
+  .footer-grid h5 { font-size: 13px; margin-bottom: 14px; color: var(--text); }
+  .footer-grid ul { list-style: none; }
+  .footer-grid li { margin-bottom: 10px; }
+  .footer-grid a { color: var(--muted); font-size: 13.5px; }
+  .footer-grid a:hover { color: var(--primary); }
+  .footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 24px; border-top: 1px solid var(--border); font-size: 13px; color: var(--muted); flex-wrap: wrap; gap: 12px; }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 900px) {
+    .nav-links { display: none; }
+    .burger { display: block; }
+    .hero-grid, .privacy-grid, .mcp-grid { grid-template-columns: 1fr; }
+    .hero h1 { font-size: 36px; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .steps { grid-template-columns: 1fr 1fr; row-gap: 32px; }
+    .pack-panel.active { grid-template-columns: 1fr; }
+    .pricing-grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    section { padding: 64px 0; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= NAV ================= -->
+<header>
+  <nav class="container">
+    <div class="logo"><span class="mark">EP</span>Exec<span class="thin">Pilot</span></div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#mcp">Live Data (MCP)</a>
+      <a href="#recipes">Recipe Packs</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#setup">Ollama Setup</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <div class="nav-cta">
+      <a href="#" class="btn btn-primary">Get ExecPilot</a>
+    </div>
+    <button class="burger">☰</button>
+  </nav>
+</header>
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <div class="eyebrow"><span class="dot"></span> Now with MCP tool-server support</div>
+      <h1>The AI command center for <span class="accent">executives</span>, not chatbots.</h1>
+      <p class="lead">Outcome-driven recipes, your own AI provider, live business data via MCP, and total privacy control. Connect Claude, OpenAI, OpenRouter, ZenMux, or a fully local Ollama model.</p>
+      <div class="hero-actions">
+        <a href="#" class="btn btn-primary btn-lg">Add to Chrome — Free</a>
+        <a href="#mcp" class="btn btn-ghost btn-lg">See live data in action</a>
+      </div>
+      <div class="hero-note">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+        No markup on AI usage — you pay providers directly. Your keys never leave your device.
+      </div>
+    </div>
+    <div class="mock-card">
+      <div class="mock-top">
+        <span class="mock-title">💬 Ask ExecPilot Anything</span>
+        <span class="mock-badge">MCP Connected</span>
+      </div>
+      <div class="mock-recipe">"What were my earnings last quarter?" <span class="tag">You</span></div>
+      <div class="mock-recipe">🔧 Calling: reports__get_earnings <span class="tag">Q3-2025</span></div>
+      <div class="mock-out">
+        <strong>Q3 revenue: $4.2M (+12% QoQ).</strong> Full report ready — ⬇ Download .xlsx<span class="typing-dot"></span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PROVIDER STRIP ================= -->
+<div class="strip">
+  <div class="container">
+    <span class="strip-label">Bring your own model</span>
+    <div class="provider-chip"><span class="swatch"></span>Claude</div>
+    <div class="provider-chip"><span class="swatch"></span>OpenAI</div>
+    <div class="provider-chip"><span class="swatch"></span>OpenRouter</div>
+    <div class="provider-chip"><span class="swatch"></span>ZenMux</div>
+    <div class="provider-chip"><span class="swatch"></span>Ollama (Local)</div>
+  </div>
+</div>
+
+<!-- ================= FEATURES ================= -->
+<section id="features">
+  <div class="container">
+    <div class="section-head">
+      <h2>Built for outcomes, not conversations</h2>
+      <p>Every recipe is a structured workflow — inputs, steps, and a finished output — so you get answers, not another blank chat box.</p>
+    </div>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🧩</div>
+        <h3>Recipe Packs</h3>
+        <p>Pre-built workflows for CEOs, CFOs, CTOs, CHROs and CMOs — board deck reviews, contract risk scans, investor emails, and more.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔧</div>
+        <h3>Live Data via MCP</h3>
+        <p>Connect internal tool servers over the Model Context Protocol. Ask a question — the AI routes it to the right tool and returns real numbers, not guesses.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔌</div>
+        <h3>Any Model, One Interface</h3>
+        <p>Connect Claude, OpenAI, OpenRouter, ZenMux, or a local Ollama model. Switch providers per recipe — no lock-in, ever.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔒</div>
+        <h3>Local-First Privacy</h3>
+        <p>Sensitive material — HR, M&amp;A, financials — can be routed to run entirely offline on your machine via Ollama. Tool-calling works locally too.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚙️</div>
+        <h3>Code-Execution Skills</h3>
+        <p>For spreadsheets, the AI writes a transformation script that runs locally on your full dataset — exact math, any file size.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🛠️</div>
+        <h3>Your Own Recipes &amp; Skills</h3>
+        <p>Build custom workflows in a visual editor. Save reusable skills — your voice, your company context, your rubrics.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= MCP USE CASE ================= -->
+<section id="mcp" class="mcp-section">
+  <div class="container mcp-grid">
+    <div>
+      <h2>Ask a question. Get real numbers from your own systems.</h2>
+      <p class="body">ExecPilot speaks the <strong>Model Context Protocol (MCP)</strong> — the open standard for connecting AI to tools. Point it at your internal reporting server and the AI stops guessing and starts querying.</p>
+      <ul class="mcp-points">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+          <div><strong>Connect multiple servers</strong><span class="d">HTTP or SSE transport, with bearer-token or custom-header auth. Your finance server, your CRM connector, your BI gateway — all at once.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+          <div><strong>Automatic tool routing</strong><span class="d">Ask in plain English. The AI discovers your server's tools, picks the right one, fills in the arguments, and calls it — with a visible trace of every call.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+          <div><strong>Reports come back as Excel</strong><span class="d">When a tool returns tabular data, ExecPilot detects it and offers a one-click .xlsx download.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+          <div><strong>Permission-gated by design</strong><span class="d">ExecPilot only gains access to a server's exact origin when you explicitly approve it — Chrome prompts you, per server.</span></div>
+        </li>
+      </ul>
+    </div>
+    <div class="mcp-flow">
+      <div class="flow-step">
+        <div class="flow-icon">💬</div>
+        <div><h5>You ask</h5><p><span class="bubble">"What were my earnings last quarter?"</span></p></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-icon">🧠</div>
+        <div><h5>AI picks the tool</h5><p>Discovers <strong>get_earnings_report</strong> on your Finance MCP server and calls it with <em>period: Q3-2025</em>.</p></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-icon">🔧</div>
+        <div><h5>Server responds with real data</h5><p>Your own system returns the rows — the AI never invents a number.</p></div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-icon">📊</div>
+        <div><h5>Answer + Excel download</h5><p>A plain-English summary on screen, and the full report one click away as .xlsx.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HOW IT WORKS ================= -->
+<section id="how-it-works">
+  <div class="container">
+    <div class="section-head">
+      <h2>From input to outcome in four steps</h2>
+      <p>No prompt engineering required. Pick a recipe, add your content, get a finished result.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h4>Connect your model</h4>
+        <p>Add an API key or point to a local Ollama instance. Keys stay on your device.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h4>Pick a recipe</h4>
+        <p>Choose from built-in packs, a custom recipe, or just Ask ExecPilot Anything.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h4>Add your content</h4>
+        <p>Paste text, capture a selection, drop in a file — or let MCP tools fetch live data.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">4</div>
+        <h4>Get your outcome</h4>
+        <p>A finished brief, email, table, or downloadable Excel file — ready to use.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RECIPE PACKS ================= -->
+<section id="recipes" style="background:var(--surface); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container">
+    <div class="section-head">
+      <h2>A recipe pack for every seat at the table</h2>
+      <p>Switch tabs to preview what's inside each role-specific pack.</p>
+    </div>
+    <div class="packs-tabs">
+      <button class="pack-tab active" data-pack="ceo">CEO</button>
+      <button class="pack-tab" data-pack="cfo">CFO</button>
+      <button class="pack-tab" data-pack="cto">CTO / CIO</button>
+      <button class="pack-tab" data-pack="chro">CHRO</button>
+      <button class="pack-tab" data-pack="universal">Universal</button>
+    </div>
+
+    <div class="pack-panel active" data-panel="ceo">
+      <div class="pack-item"><span class="emoji">📋</span><div><h5>Board Deck Reviewer</h5><p>Finds red flags, gaps, and the hardest questions a director will ask.</p></div></div>
+      <div class="pack-item"><span class="emoji">🔭</span><div><h5>News → Strategic Implications</h5><p>Turns market or competitor news into a threat/opportunity brief.</p></div></div>
+      <div class="pack-item"><span class="emoji">✉️</span><div><h5>Investor Update Drafter</h5><p>Drafts investor emails in your saved voice and tone.</p></div></div>
+      <div class="pack-item"><span class="emoji">⚖️</span><div><h5>Steelman the Opposition</h5><p>Stress-tests a decision with the strongest opposing case.</p></div></div>
+    </div>
+
+    <div class="pack-panel" data-panel="cfo">
+      <div class="pack-item"><span class="emoji">📊</span><div><h5>Financial Report Summarizer</h5><p>Upload a PDF or XLSX for an instant variance analysis.</p></div></div>
+      <div class="pack-item"><span class="emoji">📑</span><div><h5>Contract Risk Scanner</h5><p>Flags liability, indemnity, and renewal clauses that need counsel review.</p></div></div>
+      <div class="pack-item"><span class="emoji">🔧</span><div><h5>Live Earnings Queries (MCP)</h5><p>Ask for last quarter's numbers — pulled straight from your reporting server.</p></div></div>
+      <div class="pack-item"><span class="emoji">⚙️</span><div><h5>Spreadsheet Transformer</h5><p>Cleans, merges, and recalculates spreadsheets — returns a real .xlsx.</p></div></div>
+    </div>
+
+    <div class="pack-panel" data-panel="cto">
+      <div class="pack-item"><span class="emoji">🔐</span><div><h5>Vendor Security Review</h5><p>Analyzes a vendor's security questionnaire for gaps.</p></div></div>
+      <div class="pack-item"><span class="emoji">⚖️</span><div><h5>Build vs. Buy Scorecard</h5><p>Evaluates a technical proposal against your criteria.</p></div></div>
+      <div class="pack-item"><span class="emoji">🧯</span><div><h5>Incident Postmortem Summarizer</h5><p>Turns a raw incident log into a clean postmortem doc.</p></div></div>
+      <div class="pack-item"><span class="emoji">🗺️</span><div><h5>Architecture Doc Reviewer</h5><p>Flags scalability and security concerns in design docs.</p></div></div>
+    </div>
+
+    <div class="pack-panel" data-panel="chro">
+      <div class="pack-item"><span class="emoji">🔴</span><div><h5>Sensitive Comms Drafter</h5><p>Local-model-only by default — for HR matters that can't touch the cloud.</p></div></div>
+      <div class="pack-item"><span class="emoji">📄</span><div><h5>Policy Document Comparator</h5><p>Diffs two policy versions and summarizes material changes.</p></div></div>
+      <div class="pack-item"><span class="emoji">💬</span><div><h5>Engagement Survey Themes</h5><p>Extracts themes and sentiment from open-text survey responses.</p></div></div>
+      <div class="pack-item"><span class="emoji">📋</span><div><h5>Job Description Generator</h5><p>Drafts role descriptions consistent with your leveling framework.</p></div></div>
+    </div>
+
+    <div class="pack-panel" data-panel="universal">
+      <div class="pack-item"><span class="emoji">💬</span><div><h5>Ask ExecPilot Anything</h5><p>Free-form requests, with live MCP tool-calling when servers are connected.</p></div></div>
+      <div class="pack-item"><span class="emoji">📋</span><div><h5>Executive Brief</h5><p>Turns anything into 3 bullets plus a recommendation.</p></div></div>
+      <div class="pack-item"><span class="emoji">✅</span><div><h5>Notes → Decisions &amp; Actions</h5><p>Extracts owners and deadlines from raw meeting notes.</p></div></div>
+      <div class="pack-item"><span class="emoji">✉️</span><div><h5>Draft Email Reply</h5><p>Summarizes a thread and drafts your reply in seconds.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRIVACY ================= -->
+<section id="privacy" class="privacy-section" style="background:var(--bg); border:none;">
+  <div class="container privacy-grid">
+    <div>
+      <h2>Privacy isn't a setting. It's the architecture.</h2>
+      <ul class="privacy-list">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+          <div><strong>No middleman server</strong><span class="desc">Every call goes direct from your device to the provider or MCP server you chose. ExecPilot never sees your prompts.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+          <div><strong>Local-only mode</strong><span class="desc">Route sensitive recipes to Ollama running on your own machine — nothing ever reaches the internet.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+          <div><strong>Per-origin permissions</strong><span class="desc">MCP servers get access only after you approve their exact origin in a Chrome permission prompt — revocable anytime.</span></div>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>
+          <div><strong>Keys stored locally</strong><span class="desc">Browser-local storage in Chrome, DPAPI-encrypted on Windows. Never logged, never exported.</span></div>
+        </li>
+      </ul>
+      <a href="privacy.html" class="btn btn-ghost">Read the full Privacy Policy →</a>
+    </div>
+    <div class="tier-card">
+      <div class="tier-row">
+        <span class="tier-dot local"></span>
+        <div><h5>🔴 Local Tier</h5><p>Ollama only. Zero network egress. HR, M&amp;A, board materials.</p></div>
+      </div>
+      <div class="tier-row">
+        <span class="tier-dot approved"></span>
+        <div><h5>🟡 Approved Cloud</h5><p>Pre-vetted providers for internal, non-public material.</p></div>
+      </div>
+      <div class="tier-row">
+        <span class="tier-dot general"></span>
+        <div><h5>🟢 General Cloud</h5><p>Any connected provider. Fast, low-cost, for public or low-sensitivity tasks.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= OLLAMA SETUP / CORS ================= -->
+<section id="setup" style="background:var(--surface); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="container" style="max-width:860px;">
+    <div class="section-head">
+      <h2>Setting up local Ollama (fixing CORS)</h2>
+      <p>Browsers block extensions from calling local services unless the service allows it. Ollama needs one environment variable — <strong>OLLAMA_ORIGINS</strong> — to accept requests from ExecPilot. Pick the option that suits you.</p>
+    </div>
+
+    <div class="setup-tabs">
+      <button class="setup-tab active" data-setup="session">Per session</button>
+      <button class="setup-tab" data-setup="user">Permanent (this user)</button>
+      <button class="setup-tab" data-setup="machine">Permanent (all users)</button>
+    </div>
+
+    <div class="setup-panel active" data-setup-panel="session">
+      <p class="note">Sets the variable only for the current PowerShell window. Ollama accepts extension requests until you close that window or stop the server. Good for trying things out.</p>
+      <div class="code-block"><button class="copy-code">Copy</button><span class="cmt"># Stop Ollama if it's already running (quit it from the system tray first), then:</span>
+$env:OLLAMA_ORIGINS = "chrome-extension://*"
+ollama serve</div>
+      <p class="note">Keep this PowerShell window open while you use ExecPilot. When you close it, the setting is gone.</p>
+    </div>
+
+    <div class="setup-panel" data-setup-panel="user">
+      <p class="note">Sets the variable permanently for your Windows account. Survives reboots. No admin rights needed. Recommended for most people.</p>
+      <div class="code-block"><button class="copy-code">Copy</button><span class="cmt"># Run in any PowerShell window (no admin needed):</span>
+[System.Environment]::SetEnvironmentVariable("OLLAMA_ORIGINS", "chrome-extension://*", "User")</div>
+      <p class="note">Then fully restart Ollama: right-click the Ollama icon in the system tray → Quit, and start it again (or reboot). New environment variables are only picked up on a fresh start.</p>
+    </div>
+
+    <div class="setup-panel" data-setup-panel="machine">
+      <p class="note">Sets the variable system-wide for every user account on the machine. Requires an elevated (Administrator) PowerShell. Use this on shared workstations or when Ollama runs under a service account.</p>
+      <div class="code-block"><button class="copy-code">Copy</button><span class="cmt"># Run PowerShell AS ADMINISTRATOR (right-click → Run as administrator):</span>
+[System.Environment]::SetEnvironmentVariable("OLLAMA_ORIGINS", "chrome-extension://*", "Machine")</div>
+      <p class="note">Then fully restart Ollama (tray → Quit → start again), or reboot the machine.</p>
+      <div class="setup-warn">⚠ Security note: <code>chrome-extension://*</code> allows any browser extension on the machine to call your local Ollama. For a tighter setup, replace the wildcard with ExecPilot's exact extension ID, e.g. <code>chrome-extension://abcdefghijklmnop…</code> (find it at chrome://extensions).</div>
+    </div>
+
+    <p class="note" style="margin-top:20px; text-align:center;">Verify it worked: open ExecPilot → Providers → Ollama should list your local models when you run any recipe. If you still see a CORS or connection error, confirm Ollama was fully restarted after setting the variable.</p>
+  </div>
+</section>
+
+<!-- ================= PRICING (HIDDEN — remove style="display:none" on the wrapper below to re-enable) ================= -->
+<div id="pricing-wrapper" style="display:none">
+<section id="pricing">
+  <div class="container">
+    <div class="section-head">
+      <h2>Simple pricing. No AI markup.</h2>
+      <p>You pay your model provider directly. ExecPilot charges only for the product layer.</p>
+    </div>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <h3>Free</h3>
+        <div class="price">$0</div>
+        <p class="price-desc">For trying ExecPilot with your own API keys.</p>
+        <ul class="price-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>5 built-in recipes</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Bring your own API keys</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Chrome extension</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Local Ollama support</li>
+        </ul>
+        <a href="#" class="btn btn-ghost">Get started free</a>
+      </div>
+      <div class="price-card featured">
+        <span class="featured-badge">Most popular</span>
+        <h3>Pro</h3>
+        <div class="price">$19<span>/mo</span></div>
+        <p class="price-desc">For executives who run this daily.</p>
+        <ul class="price-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>All recipe packs</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Custom recipes &amp; skills</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Code-execution mode</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>MCP tool servers</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Windows desktop app</li>
+        </ul>
+        <a href="#" class="btn btn-primary">Start Pro trial</a>
+      </div>
+      <div class="price-card">
+        <h3>Team</h3>
+        <div class="price">$29<span>/seat/mo</span></div>
+        <p class="price-desc">For the exec office and chiefs of staff.</p>
+        <ul class="price-list">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Everything in Pro</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Shared recipe library</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Admin privacy policies</li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>SSO</li>
+        </ul>
+        <a href="#" class="btn btn-ghost">Talk to sales</a>
+      </div>
+    </div>
+  </div>
+</section>
+</div>
+<!-- ================= /PRICING (HIDDEN) ================= -->
+
+<!-- ================= FAQ ================= -->
+<section id="faq">
+  <div class="container" style="max-width:760px;">
+    <div class="section-head">
+      <h2>Frequently asked questions</h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item open">
+        <div class="faq-q">Do I need my own API keys? <span class="plus">+</span></div>
+        <div class="faq-a">Yes — ExecPilot is BYOM (bring your own model). You connect Claude, OpenAI, OpenRouter, ZenMux, or a local Ollama instance with your own credentials. This means no AI usage markup and full control over cost and data flow.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What is MCP and what do I need to use it? <span class="plus">+</span></div>
+        <div class="faq-a">The Model Context Protocol is an open standard for connecting AI to tools. If your company exposes an MCP server over HTTP (e.g. a reporting or data service), add its URL under MCP Servers, approve the permission prompt, and the AI can call its tools when you ask questions. Local stdio-based MCP servers are supported in the Windows desktop app.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I use this without sending data to the cloud? <span class="plus">+</span></div>
+        <div class="faq-a">Yes. Connect Ollama running locally and route any recipe to the Local tier. Files are parsed on-device before anything is sent anywhere, and local-tier recipes never leave your machine. Tool-calling also works with local models that support it (Llama 3.1+, Qwen2.5, Mistral Nemo).</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">What file types can I upload? <span class="plus">+</span></div>
+        <div class="faq-a">XLSX, CSV, TXT, and MD today — with PDF, DOCX and images on the roadmap. Spreadsheets can be transformed and downloaded back as a real .xlsx file using code-execution mode, and MCP report results export to Excel too.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Can I build my own recipes? <span class="plus">+</span></div>
+        <div class="faq-a">Yes — the Recipe Builder lets you define inputs and prompts without writing code. You can also create and edit reusable "Skills" like your writing voice, company context, or data-cleaning rules.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Ollama says connection refused / CORS error — what do I do? <span class="plus">+</span></div>
+        <div class="faq-a">Ollama needs the OLLAMA_ORIGINS environment variable set so it accepts requests from browser extensions. See the "Ollama Setup" section above for per-session, per-user, and machine-wide PowerShell commands. Remember to fully restart Ollama afterwards.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FINAL CTA ================= -->
+<section style="padding-top:0;">
+  <div class="cta-band">
+    <h2>Stop prompting. Start deciding.</h2>
+    <p>Install ExecPilot, connect a model, and run your first recipe in under two minutes.</p>
+    <a href="#" class="btn btn-primary btn-lg">Add to Chrome — Free</a>
+    <a href="#" class="btn btn-ghost btn-lg">Download for Windows</a>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="logo" style="margin-bottom:14px;"><span class="mark">EP</span>Exec<span class="thin">Pilot</span></div>
+        <p class="muted" style="font-size:13.5px; max-width:280px; font-weight:300;">The AI command center for executives. Bring your own model. Own your data.</p>
+      </div>
+      <div>
+        <h5>Product</h5>
+        <ul>
+          <li><a href="#features">Features</a></li>
+          <li><a href="#mcp">Live Data (MCP)</a></li>
+          <li><a href="#recipes">Recipe Packs</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Resources</h5>
+        <ul>
+          <li><a href="#setup">Ollama Setup</a></li>
+          <li><a href="#faq">FAQ</a></li>
+          <li><a href="privacy.html">Privacy Policy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Company</h5>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Terms</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2025 ExecPilot. All rights reserved.</span>
+      <span>Built for the C-suite. Not affiliated with Anthropic, OpenAI, or any listed model provider.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Pack tabs
+  document.querySelectorAll(".pack-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".pack-tab").forEach((t) => t.classList.remove("active"));
+      document.querySelectorAll(".pack-panel").forEach((p) => p.classList.remove("active"));
+      tab.classList.add("active");
+      document.querySelector(`.pack-panel[data-panel="${tab.dataset.pack}"]`).classList.add("active");
+    });
+  });
+
+  // Ollama setup tabs
+  document.querySelectorAll(".setup-tab").forEach((tab) => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".setup-tab").forEach((t) => t.classList.remove("active"));
+      document.querySelectorAll(".setup-panel").forEach((p) => p.classList.remove("active"));
+      tab.classList.add("active");
+      document.querySelector(`.setup-panel[data-setup-panel="${tab.dataset.setup}"]`).classList.add("active");
+    });
+  });
+
+  // Copy buttons for code blocks
+  document.querySelectorAll(".copy-code").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const block = btn.parentElement.cloneNode(true);
+      block.querySelector(".copy-code").remove();
+      navigator.clipboard.writeText(block.textContent.trim());
+      btn.textContent = "Copied ✓";
+      setTimeout(() => (btn.textContent = "Copy"), 1500);
+    });
+  });
+
+  // FAQ accordion
+  document.querySelectorAll(".faq-q").forEach((q) => {
+    q.addEventListener("click", () => {
+      const item = q.parentElement;
+      const isOpen = item.classList.contains("open");
+      document.querySelectorAll(".faq-item").forEach((i) => i.classList.remove("open"));
+      if (!isOpen) item.classList.add("open");
+    });
+  });
+</script>
+
+</body>
+</html>
