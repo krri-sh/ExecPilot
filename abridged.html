@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="Explore ExecPilot domain recipe and skill bundles without revealing the protected templates." />
+<title>Domain Packs — ExecPilot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --primary:#006080; --primary-hover:#00516c; --bg:#eaf4f8; --surface:#f8fcfd;
+    --border:#cfe4ec; --tint:#d9edf4; --text:#0f2e38; --muted:#4a6b77;
+    --error:#b3402e; --success:#1e7f4f; --gold:#d89224; --radius:12px;
+    --shadow:0 16px 42px rgba(0,96,128,.12);
+  }
+  * { box-sizing:border-box; margin:0; }
+  html { scroll-behavior:smooth; }
+  body { font-family:"Bricolage Grotesque","Segoe UI",sans-serif; background:var(--bg); color:var(--text); font-size:14px; padding:14px; }
+  button,input,select { font:inherit; }
+  a { color:var(--primary); text-decoration:none; }
+  button,a { -webkit-tap-highlight-color:transparent; }
+  button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible { outline:3px solid rgba(0,96,128,.28); outline-offset:2px; }
+  .app { max-width:1500px; margin:0 auto; }
+  .topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px; }
+  .brand { font-size:20px; font-weight:800; color:var(--primary); }
+  .brand span { font-weight:300; color:var(--text); }
+  .topnav { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .tab,.link-btn,.primary-btn { display:inline-flex; align-items:center; justify-content:center; border-radius:8px; font-weight:650; font-size:12px; padding:7px 11px; cursor:pointer; }
+  .tab,.link-btn { background:transparent; border:1px solid var(--border); color:var(--muted); }
+  .tab:hover,.tab.active,.link-btn:hover,.link-btn.active { border-color:var(--primary); color:var(--primary); background:var(--tint); }
+  .primary-btn { border:1px solid var(--primary); background:var(--primary); color:#fff; }
+  .primary-btn:hover { background:var(--primary-hover); }
+  .banner { display:flex; justify-content:space-between; align-items:center; gap:18px; padding:16px 18px; margin-bottom:12px; border:1px solid var(--border); border-radius:var(--radius); background:linear-gradient(120deg,var(--tint),#f8fcfd 74%); }
+  .banner strong { display:block; font-size:14px; color:var(--primary); }
+  .banner p { max-width:780px; margin-top:3px; color:var(--muted); font-size:12px; line-height:1.45; }
+  .banner-badge { flex:none; border:1px solid var(--border); border-radius:20px; background:#fff; color:var(--primary); padding:5px 10px; font-size:10px; font-weight:750; }
+  .workspace { display:grid; grid-template-columns:260px minmax(0,1fr); gap:12px; align-items:start; }
+  .sidebar,.main-panel,.detail-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); }
+  .sidebar { position:sticky; top:12px; max-height:calc(100vh - 28px); overflow:auto; padding:12px; }
+  .search-wrap { position:relative; margin-bottom:10px; }
+  .search-wrap span { position:absolute; left:10px; top:9px; color:var(--muted); }
+  input[type="search"] { width:100%; padding:8px 10px 8px 30px; border:1px solid var(--border); border-radius:8px; background:#fff; color:var(--text); font-size:12px; }
+  .sidebar-title { margin:12px 4px 7px; color:var(--muted); font-size:10px; font-weight:750; letter-spacing:.08em; text-transform:uppercase; }
+  .domain-list { display:grid; gap:5px; }
+  .domain-btn { width:100%; display:grid; grid-template-columns:25px minmax(0,1fr) auto; align-items:center; gap:7px; padding:7px 8px; border:1px solid transparent; border-radius:8px; background:transparent; color:var(--muted); text-align:left; cursor:pointer; }
+  .domain-btn:hover { background:var(--bg); color:var(--primary); }
+  .domain-btn.active { background:var(--primary); color:#fff; }
+  .domain-btn .emoji { font-size:15px; }
+  .domain-btn .name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:11.5px; font-weight:650; }
+  .domain-btn .count { font-size:9px; font-weight:750; opacity:.8; }
+  .main-panel { min-width:0; padding:14px; }
+  .pack-head { display:flex; justify-content:space-between; align-items:flex-start; gap:14px; margin-bottom:12px; }
+  .pack-kicker { margin-bottom:3px; color:var(--primary); font-size:10px; font-weight:750; text-transform:uppercase; letter-spacing:.08em; }
+  h1 { color:var(--primary); font-size:22px; line-height:1.15; }
+  .pack-desc { max-width:760px; margin-top:5px; color:var(--muted); font-size:12px; line-height:1.45; }
+  .stats { display:flex; justify-content:flex-end; gap:6px; flex-wrap:wrap; }
+  .stat { padding:4px 9px; border-radius:20px; background:var(--tint); color:var(--primary); font-size:10px; font-weight:750; white-space:nowrap; }
+  .toolbar { display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; padding:9px 0; margin-bottom:12px; border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+  .view-tabs,.actions,.detail-actions { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
+  .catalog-grid { display:grid; grid-template-columns:minmax(290px,.78fr) minmax(360px,1.22fr); gap:12px; align-items:start; }
+  .item-list { display:grid; gap:8px; max-height:760px; overflow:auto; padding-right:2px; }
+  .recipe-card { width:100%; padding:12px; border:1px solid var(--border); border-radius:10px; background:var(--surface); color:var(--text); text-align:left; cursor:pointer; transition:.15s; }
+  .recipe-card:hover { border-color:var(--primary); box-shadow:0 3px 10px rgba(0,96,128,.1); transform:translateY(-1px); }
+  .recipe-card.active { border-color:var(--primary); box-shadow:inset 3px 0 0 var(--primary); }
+  .recipe-card h3 { position:relative; padding-right:64px; font-size:13px; font-weight:650; }
+  .recipe-card .pack { position:absolute; right:0; top:0; padding:2px 7px; border-radius:20px; background:var(--tint); color:var(--primary); font-size:9px; font-weight:750; }
+  .recipe-card p { margin-top:4px; color:var(--muted); font-size:11.5px; font-weight:350; line-height:1.4; }
+  .detail-card { position:sticky; top:12px; min-width:0; padding:16px; overflow:hidden; }
+  .detail-top { display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:9px; }
+  .detail-title { color:var(--primary); font-size:18px; line-height:1.2; }
+  .detail-desc { margin-top:4px; color:var(--muted); font-size:12px; line-height:1.45; }
+  .type-badge { flex:none; padding:4px 8px; border-radius:20px; background:var(--tint); color:var(--primary); font-size:9px; font-weight:750; text-transform:uppercase; }
+  .section-label { margin:15px 0 6px; color:var(--muted); font-size:10px; font-weight:750; letter-spacing:.07em; text-transform:uppercase; }
+  .redacted-preview { position:relative; min-height:115px; overflow:hidden; border:1px solid var(--border); border-radius:9px; background:var(--bg); }
+  .redacted-lines { display:grid; gap:9px; padding:15px; filter:blur(5px); opacity:.62; transform:scale(1.02); user-select:none; }
+  .redacted-lines span { display:block; height:10px; border-radius:6px; background:linear-gradient(90deg,var(--primary),#7cb6c9); }
+  .redacted-lines span:nth-child(2) { width:84%; }
+  .redacted-lines span:nth-child(3) { width:92%; }
+  .redacted-lines span:nth-child(4) { width:68%; }
+  .redacted-lock { position:absolute; inset:0; display:grid; place-content:center; gap:5px; padding:18px; background:rgba(244,250,252,.55); color:var(--error); text-align:center; }
+  .redacted-lock strong { font-size:12px; }
+  .redacted-lock span { color:var(--muted); font-size:10px; }
+  .included { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin-top:12px; }
+  .included div { padding:9px; border:1px solid var(--border); border-radius:8px; background:#fff; color:var(--muted); font-size:10.5px; text-align:center; }
+  .included strong { display:block; margin-bottom:2px; color:var(--primary); font-size:12px; }
+  .detail-actions { margin-top:16px; padding-top:12px; border-top:1px solid var(--border); }
+  .protected-note { margin-top:10px; color:var(--muted); font-size:10px; line-height:1.4; }
+  .empty { padding:30px 16px; border:1px dashed var(--border); border-radius:var(--radius); color:var(--muted); font-size:12px; text-align:center; }
+  .mobile-domain { display:none; }
+  .pricing { margin-top:16px; padding:28px 20px; border:1px solid var(--border); border-radius:16px; background:#f8fcfd; }
+  .pricing-head { max-width:720px; margin:0 auto 20px; text-align:center; }
+  .eyebrow { color:var(--primary); font-size:10px; font-weight:800; letter-spacing:.1em; text-transform:uppercase; }
+  .pricing h2 { margin-top:5px; color:var(--text); font-size:25px; }
+  .pricing-head p { margin-top:6px; color:var(--muted); font-size:12px; line-height:1.5; }
+  .price-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; max-width:1050px; margin:0 auto; }
+  .price-card { position:relative; display:flex; flex-direction:column; padding:18px; border:1px solid var(--border); border-radius:14px; background:#fff; }
+  .price-card.featured { border:2px solid var(--primary); box-shadow:var(--shadow); }
+  .popular { position:absolute; right:14px; top:14px; padding:3px 8px; border-radius:20px; background:var(--primary); color:#fff; font-size:9px; font-weight:750; }
+  .price-name { color:var(--primary); font-size:14px; font-weight:750; }
+  .price { margin:8px 0 2px; color:var(--text); font-size:31px; font-weight:800; }
+  .price small { color:var(--muted); font-size:10px; font-weight:500; }
+  .price-card > p { min-height:38px; color:var(--muted); font-size:11px; line-height:1.45; }
+  .feature-list { display:grid; gap:7px; margin:14px 0 18px; color:var(--text); font-size:11px; list-style:none; }
+  .feature-list li::before { content:"✓"; margin-right:7px; color:var(--success); font-weight:800; }
+  .price-card button { width:100%; margin-top:auto; }
+  .checkout-note { margin-top:14px; color:var(--muted); font-size:10px; text-align:center; }
+  dialog { width:min(500px,calc(100% - 28px)); padding:0; border:0; border-radius:16px; color:var(--text); box-shadow:0 28px 90px rgba(15,46,56,.35); }
+  dialog::backdrop { background:rgba(15,46,56,.58); backdrop-filter:blur(3px); }
+  .modal-body { padding:22px; }
+  .modal-icon { width:38px; height:38px; display:grid; place-items:center; margin-bottom:12px; border-radius:10px; background:var(--tint); color:var(--primary); font-size:18px; }
+  .modal-body h2 { color:var(--primary); font-size:20px; }
+  .modal-body p { margin-top:7px; color:var(--muted); font-size:12px; line-height:1.55; }
+  .email-box { margin:14px 0; padding:11px; border:1px solid var(--border); border-radius:9px; background:var(--bg); color:var(--primary); font-weight:750; text-align:center; }
+  .modal-actions { display:flex; justify-content:flex-end; gap:8px; flex-wrap:wrap; }
+  footer { display:flex; justify-content:space-between; gap:10px; flex-wrap:wrap; padding:17px 4px 4px; color:var(--muted); font-size:10px; }
+  @media (max-width:1050px) { .workspace{grid-template-columns:220px minmax(0,1fr)} .catalog-grid{grid-template-columns:1fr} .detail-card{position:static} .item-list{max-height:430px} }
+  @media (max-width:780px) { body{padding:10px} .topnav .optional{display:none} .workspace{display:block} .sidebar{display:none} .mobile-domain{display:block;width:100%;margin-bottom:10px;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text)} .pack-head{display:block} .stats{justify-content:flex-start;margin-top:9px} .banner{align-items:flex-start} .banner-badge{display:none} .main-panel{padding:12px} .price-grid{grid-template-columns:1fr} .price-card>p{min-height:0} }
+  @media (max-width:480px) { .included{grid-template-columns:1fr} .pricing{padding:22px 12px} .topbar{align-items:flex-start} }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <a class="brand" href="index1.html" aria-label="ExecPilot home">Exec<span>Pilot</span></a>
+    <nav class="topnav" aria-label="ExecPilot navigation">
+      <button class="tab active" type="button" data-top-view="recipes">Recipes</button>
+      <button class="tab" type="button" data-top-view="skills">Skills</button>
+      <a class="tab" href="#bundles">Bundles</a>
+      <a class="tab optional" href="index1.html#features">Features</a>
+      <a class="tab optional" href="index1.html#pricing">License</a>
+    </nav>
+  </header>
+
+  <section class="banner" aria-label="Catalog introduction">
+    <div><strong>Predefined domain packs</strong><p>Browse the complete recipe and reusable-skill catalog. The protected implementation details are delivered with your purchased pack as import-ready JSON.</p></div>
+    <span class="banner-badge">300 protected assets · one-time purchase</span>
+  </section>
+
+  <div class="workspace">
+    <aside class="sidebar">
+      <div class="search-wrap"><span>⌕</span><input id="search" type="search" placeholder="Search this domain" autocomplete="off" /></div>
+      <div class="sidebar-title">Domain packs</div>
+      <div id="domain-list" class="domain-list"></div>
+    </aside>
+
+    <main class="main-panel">
+      <select id="mobile-domain" class="mobile-domain" aria-label="Choose domain"></select>
+      <div class="pack-head">
+        <div><div class="pack-kicker">Protected pack preview</div><h1 id="pack-title">Loading packs…</h1><p id="pack-description" class="pack-desc"></p></div>
+        <div class="stats"><span class="stat" id="recipe-count">— recipes</span><span class="stat" id="skill-count">— skills</span><span class="stat">🔒 Import-ready JSON</span></div>
+      </div>
+
+      <div class="toolbar">
+        <div class="view-tabs" role="tablist" aria-label="Pack content">
+          <button id="recipes-tab" class="link-btn active" type="button" data-view="recipes" role="tab">Recipes</button>
+          <button id="skills-tab" class="link-btn" type="button" data-view="skills" role="tab">Reusable skills</button>
+        </div>
+        <div class="actions"><a class="primary-btn" href="#bundles">View bundle pricing</a></div>
+      </div>
+
+      <div class="catalog-grid">
+        <div id="item-list" class="item-list" aria-label="Pack items"></div>
+        <article id="detail" class="detail-card" aria-live="polite"></article>
+      </div>
+    </main>
+  </div>
+
+  <section id="bundles" class="pricing" aria-labelledby="pricing-title">
+    <div class="pricing-head"><div class="eyebrow">One-time pricing</div><h2 id="pricing-title">Choose the depth that fits your team</h2><p>Every purchase includes import-ready recipe and skill JSON files. No recurring pack subscription; ExecPilot licensing is separate.</p></div>
+    <div class="price-grid">
+      <article class="price-card">
+        <div class="price-name">Single Domain Pack</div><div class="price">$39 <small>one time</small></div>
+        <p>A focused toolkit for one business domain or operating team.</p>
+        <ul class="feature-list"><li>10 domain recipes</li><li>5 reusable skills</li><li>Import-ready JSON files</li><li>Quick-start usage notes</li></ul>
+        <button class="link-btn" type="button" data-buy="single">Get this domain pack</button>
+      </article>
+      <article class="price-card featured">
+        <span class="popular">Best for teams</span>
+        <div class="price-name">Pick Any 5 Packs</div><div class="price">$129 <small>one time</small></div>
+        <p>Mix domains for a cross-functional team, advisory practice, or pilot.</p>
+        <ul class="feature-list"><li>50 domain recipes</li><li>25 reusable skills</li><li>Choose any five domains</li><li>Save $66 versus singles</li></ul>
+        <button class="primary-btn" type="button" data-buy="five">Choose five packs</button>
+      </article>
+      <article class="price-card">
+        <div class="price-name">Complete Pack Library</div><div class="price">$299 <small>one time</small></div>
+        <p>The full catalog for consultancies, transformation teams, and varied operations.</p>
+        <ul class="feature-list"><li>200 domain recipes</li><li>100 reusable skills</li><li>All 20 domain packs</li><li>Save $481 versus singles</li></ul>
+        <button class="link-btn" type="button" data-buy="complete">Get the complete library</button>
+      </article>
+    </div>
+    <p class="checkout-note">Checkout buttons are Lemon Squeezy-ready. Until checkout links are connected, enquiries open a pre-addressed email to hello@krri.sh.</p>
+  </section>
+
+  <footer><span>ExecPilot protected pack catalog</span><span><a href="index1.html">Website</a> · <a href="privacy.html">Privacy Policy</a></span></footer>
+</div>
+
+<dialog id="contact-dialog" aria-labelledby="contact-title">
+  <div class="modal-body">
+    <div class="modal-icon">✦</div>
+    <h2 id="contact-title">Unlock this ExecPilot pack</h2>
+    <p id="contact-message">Email us for pack availability, licensing, delivery, or a bundle recommendation.</p>
+    <div class="email-box">hello@krri.sh</div>
+    <div class="modal-actions"><button id="close-dialog" class="link-btn" type="button">Not now</button><a id="email-link" class="primary-btn" href="mailto:hello@krri.sh">Email hello@krri.sh</a></div>
+  </div>
+</dialog>
+
+<script src="abridged-packs-data.js"></script>
+<script>
+const PACKS = Array.isArray(window.ABRIDGED_PACKS) ? window.ABRIDGED_PACKS : [];
+const state = { domain: PACKS[0]?.id || "", view: "recipes", query: "", selected: null };
+const $ = selector => document.querySelector(selector);
+const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, character => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[character]));
+
+// Paste Lemon Squeezy checkout URLs here when products are ready. Empty values use the email enquiry fallback.
+const CHECKOUT_URLS = Object.freeze({ single:"https://krrish.lemonsqueezy.com/checkout/buy/16c5eb5c-5098-419c-a861-11f5dbf446c0", five:"https://krrish.lemonsqueezy.com/checkout/buy/16c5eb5c-5098-419c-a861-11f5dbf446c0", complete:"https://krrish.lemonsqueezy.com/checkout/buy/16c5eb5c-5098-419c-a861-11f5dbf446c0" });
+const packById = id => PACKS.find(pack => pack.id === id);
+
+function renderDomainNavigation() {
+  $("#domain-list").innerHTML = PACKS.map(pack => `<button class="domain-btn ${pack.id === state.domain ? "active" : ""}" type="button" data-domain="${escapeHtml(pack.id)}"><span class="emoji">${escapeHtml(pack.icon)}</span><span class="name">${escapeHtml(pack.name)}</span><span class="count">${pack.recipes.length + pack.skills.length}</span></button>`).join("");
+  $("#mobile-domain").innerHTML = PACKS.map(pack => `<option value="${escapeHtml(pack.id)}" ${pack.id === state.domain ? "selected" : ""}>${escapeHtml(pack.icon)} ${escapeHtml(pack.name)}</option>`).join("");
+}
+
+function setView(view) {
+  state.view = view;
+  state.selected = null;
+  $("#recipes-tab").classList.toggle("active", view === "recipes");
+  $("#skills-tab").classList.toggle("active", view === "skills");
+  document.querySelectorAll("[data-top-view]").forEach(button => button.classList.toggle("active", button.dataset.topView === view));
+  renderCurrent();
+}
+
+function setDomain(id) {
+  state.domain = id;
+  state.selected = null;
+  state.query = "";
+  $("#search").value = "";
+  renderDomainNavigation();
+  renderCurrent();
+}
+
+function renderCurrent() {
+  const pack = packById(state.domain);
+  if (!pack) {
+    $("#item-list").innerHTML = `<div class="empty">Pack metadata is unavailable.</div>`;
+    $("#detail").innerHTML = `<div class="empty">Refresh the page to try again.</div>`;
+    return;
+  }
+  $("#pack-title").textContent = `${pack.icon} ${pack.name}`;
+  $("#pack-description").textContent = pack.description;
+  $("#recipe-count").textContent = `${pack.recipes.length} recipes`;
+  $("#skill-count").textContent = `${pack.skills.length} skills`;
+  const source = state.view === "recipes" ? pack.recipes : pack.skills;
+  const query = state.query.toLowerCase();
+  const filtered = source.filter(item => `${item.name} ${item.description}`.toLowerCase().includes(query));
+  if (!filtered.some(item => item.id === state.selected)) state.selected = filtered[0]?.id || null;
+  renderItems(filtered, pack);
+}
+
+function renderItems(items, pack) {
+  if (!items.length) {
+    $("#item-list").innerHTML = `<div class="empty">No ${state.view} match “${escapeHtml(state.query)}”.</div>`;
+    $("#detail").innerHTML = `<div class="empty">Clear the search to browse this pack.</div>`;
+    return;
+  }
+  $("#item-list").innerHTML = items.map(item => `<button class="recipe-card ${item.id === state.selected ? "active" : ""}" type="button" data-item="${escapeHtml(item.id)}"><h3>${state.view === "recipes" ? escapeHtml(item.icon || "✦") : "🛠️"} ${escapeHtml(item.name)}<span class="pack">${state.view === "recipes" ? "Recipe" : "Skill"}</span></h3><p>${escapeHtml(item.description)}</p></button>`).join("");
+  const selected = items.find(item => item.id === state.selected) || items[0];
+  state.selected = selected.id;
+  renderDetail(selected, pack);
+}
+
+function redactedBlock(label, lineCount = 5) {
+  return `<div class="section-label">${escapeHtml(label)}</div><div class="redacted-preview" aria-label="Protected content preview"><div class="redacted-lines" aria-hidden="true">${Array.from({length:lineCount}, () => "<span></span>").join("")}</div><div class="redacted-lock"><strong>🔒 Protected pack content</strong><span>Available in the purchased import-ready JSON</span></div></div>`;
+}
+
+function renderDetail(item, pack) {
+  const isRecipe = state.view === "recipes";
+  const label = isRecipe ? "Recipe" : "Reusable skill";
+  const icon = isRecipe ? item.icon || "✦" : "🛠️";
+  const preview = isRecipe
+    ? `${redactedBlock("System role and guardrails", 4)}${redactedBlock("Task template", 5)}`
+    : `${redactedBlock("Instructions applied to every run", 6)}`;
+  $("#detail").innerHTML = `<div class="detail-top"><div><h2 class="detail-title">${escapeHtml(icon)} ${escapeHtml(item.name)}</h2><p class="detail-desc">${escapeHtml(item.description)}</p></div><span class="type-badge">${label}</span></div>
+    ${preview}
+    <div class="included"><div><strong>Editable</strong>Adapt to company policy</div><div><strong>Reusable</strong>Apply across relevant runs</div><div><strong>Import-ready</strong>Structured ExecPilot JSON</div></div>
+    <div class="detail-actions"><button class="primary-btn" type="button" data-contact="${isRecipe ? "recipe" : "skill"}">Unlock ${isRecipe ? "recipe" : "skill"} details</button><button class="link-btn" type="button" data-buy="single">Get ${escapeHtml(pack.name)} pack — $39</button></div>
+    <p class="protected-note">The preview intentionally contains no underlying prompts, instructions, or downloadable JSON.</p>`;
+}
+
+function openContact(kind = "pack", plan = "single") {
+  const pack = packById(state.domain);
+  const selected = (state.view === "recipes" ? pack?.recipes : pack?.skills)?.find(item => item.id === state.selected);
+  const planNames = { single:`${pack?.name || "Selected"} domain pack`, five:"Pick Any 5 Packs bundle", complete:"Complete Pack Library" };
+  const requested = planNames[plan] || `${selected?.name || "ExecPilot pack"} details`;
+  const checkoutUrl = CHECKOUT_URLS[plan];
+  if (checkoutUrl) { window.location.href = checkoutUrl; return; }
+  $("#contact-title").textContent = kind === "pack" ? `Get the ${requested}` : `Unlock ${selected?.name || "this protected item"}`;
+  $("#contact-message").textContent = `Email hello@krri.sh to purchase ${requested}, ask about licensing, or request a tailored bundle. We’ll confirm delivery and payment details.`;
+  const subject = `ExecPilot enquiry — ${requested}`;
+  const body = `Hello,\n\nI’m interested in the ${requested}. Please send me purchase and delivery details.\n\nThank you.`;
+  $("#email-link").href = `mailto:hello@krri.sh?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  $("#contact-dialog").showModal();
+}
+
+document.addEventListener("click", event => {
+  const domain = event.target.closest("[data-domain]");
+  if (domain) return setDomain(domain.dataset.domain);
+  const view = event.target.closest("[data-view]");
+  if (view) return setView(view.dataset.view);
+  const topView = event.target.closest("[data-top-view]");
+  if (topView) return setView(topView.dataset.topView);
+  const item = event.target.closest("[data-item]");
+  if (item) { state.selected = item.dataset.item; return renderCurrent(); }
+  const contact = event.target.closest("[data-contact]");
+  if (contact) return openContact(contact.dataset.contact, "single");
+  const buy = event.target.closest("[data-buy]");
+  if (buy) return openContact("pack", buy.dataset.buy);
+});
+
+$("#search").addEventListener("input", event => { state.query = event.target.value.trim(); state.selected = null; renderCurrent(); });
+$("#mobile-domain").addEventListener("change", event => setDomain(event.target.value));
+$("#close-dialog").addEventListener("click", () => $("#contact-dialog").close());
+$("#contact-dialog").addEventListener("click", event => { if (event.target === $("#contact-dialog")) $("#contact-dialog").close(); });
+
+renderDomainNavigation();
+renderCurrent();
+</script>
+</body>
+</html>
