@@ -231,6 +231,21 @@
   .domain-library-meta span { background: var(--surface); border: 1px solid var(--border); color: var(--primary); border-radius: 999px; padding: 5px 9px; font-size: 10.5px; font-weight: 600; }
   .domain-library-cta .btn { white-space: nowrap; }
 
+  /* ---------- ENTERPRISE AI SAFETY ---------- */
+  .security-section { background: #082F3A; color: #fff; position: relative; overflow: hidden; }
+  .security-section::after { content: ""; position: absolute; width: 440px; height: 440px; right: -180px; top: -170px; border-radius: 50%; background: rgba(82,190,205,.12); }
+  .security-section .container { position: relative; z-index: 1; }
+  .security-section .section-head h2 { color: #fff; }
+  .security-section .section-head p { color: #BBD6DE; }
+  .security-kicker { display: inline-flex; align-items: center; gap: 7px; padding: 6px 10px; border: 1px solid rgba(255,255,255,.18); border-radius: 999px; color: #9FE5D0; font-size: 11px; font-weight: 700; margin-bottom: 14px; }
+  .security-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .security-card { padding: 22px; border: 1px solid rgba(255,255,255,.13); border-radius: 15px; background: rgba(255,255,255,.055); backdrop-filter: blur(4px); }
+  .security-card .security-icon { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 10px; background: rgba(159,229,208,.12); margin-bottom: 15px; font-size: 18px; }
+  .security-card h3 { font-size: 16px; color: #fff; margin-bottom: 7px; }
+  .security-card p { color: #BBD6DE; font-size: 12.5px; line-height: 1.55; font-weight: 300; }
+  .security-assurance { margin-top: 22px; padding: 16px 18px; border-left: 3px solid #72D5B7; background: rgba(255,255,255,.055); color: #D7E9EE; font-size: 12.5px; line-height: 1.55; }
+  .security-assurance strong { color: #fff; }
+
   /* ---------- PRIVACY SECTION ---------- */
   .privacy-section { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
   .privacy-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
@@ -361,6 +376,7 @@
     nav.container.nav-open .nav-menu { position: static; width: 100%; margin-top: 3px; box-shadow: none; background: var(--bg); }
     .burger { display: block; }
     .hero-grid, .privacy-grid, .mcp-grid { grid-template-columns: 1fr; }
+    .security-grid { grid-template-columns: 1fr 1fr; }
     .hero h1 { font-size: 36px; }
     .feature-grid { grid-template-columns: 1fr; }
     .steps { grid-template-columns: 1fr 1fr; row-gap: 32px; }
@@ -372,7 +388,7 @@
     .footer-grid { grid-template-columns: 1fr 1fr; }
     section { padding: 64px 0; }
   }
-  @media (max-width: 620px) { .nav-cta { display: none; } nav.container { grid-template-columns: auto 1fr auto; } .workflow-map { grid-template-columns: 1fr; } .pro-note { align-items: flex-start; flex-direction: column; } }
+  @media (max-width: 620px) { .nav-cta { display: none; } nav.container { grid-template-columns: auto 1fr auto; } .workflow-map, .security-grid { grid-template-columns: 1fr; } .pro-note { align-items: flex-start; flex-direction: column; } }
 </style>
 </head>
 <body>
@@ -390,6 +406,7 @@
       <details class="nav-more">
         <summary>Resources</summary>
         <div class="nav-menu">
+          <a href="#security">AI Safety</a>
           <a href="#privacy">Privacy</a>
           <a href="#setup">Ollama Setup</a>
           <a href="#faq">FAQ</a>
@@ -653,6 +670,26 @@
   </div>
 </section>
 
+<!-- ================= ENTERPRISE AI SAFETY ================= -->
+<section id="security" class="security-section">
+  <div class="container">
+    <div class="section-head">
+      <div class="security-kicker">DEFENCE IN DEPTH · ON-DEVICE ENFORCEMENT</div>
+      <h2>Untrusted content stays data—not authority.</h2>
+      <p>ExecPilot adds host-level controls around document Q&amp;A and MCP tool use, reducing the chance that instructions hidden in a file or tool response can redirect the model or trigger an unintended action.</p>
+    </div>
+    <div class="security-grid">
+      <article class="security-card"><div class="security-icon">🛡️</div><h3>Injection screening</h3><p>Extracted document passages, MCP definitions, and tool results are checked locally for instruction overrides, role impersonation, secret extraction, encoded payloads, and external-send patterns.</p></article>
+      <article class="security-card"><div class="security-icon">🚧</div><h3>Quarantined evidence</h3><p>High-risk document passages and MCP results are withheld from the answering model. Users see a clear warning and the reason content was constrained.</p></article>
+      <article class="security-card"><div class="security-icon">🎯</div><h3>Least-privilege tools</h3><p>No MCP tool is exposed automatically. Users select the exact servers and tools permitted for each run, keeping the model's action surface intentionally narrow.</p></article>
+      <article class="security-card"><div class="security-icon">✅</div><h3>Exact-call approval</h3><p>Every MCP invocation pauses for confirmation showing the server, tool, risk context, and exact arguments. A changed call requires a new approval.</p></article>
+      <article class="security-card"><div class="security-icon">🔎</div><h3>Schema and size enforcement</h3><p>Tool arguments are validated against their declared JSON schema. Definitions, arguments, responses, and model-bound results are bounded to limit malformed or oversized payloads.</p></article>
+      <article class="security-card"><div class="security-icon">🔒</div><h3>Tainted-session controls</h3><p>Once untrusted MCP output enters a run, subsequent proposals carry an elevated warning. Tool traces render as inert text so server-controlled markup cannot execute in the extension UI.</p></article>
+    </div>
+    <div class="security-assurance"><strong>Designed for enterprise review:</strong> security controls run in the extension, require no additional Chrome permission, and are available regardless of plan. Prompt injection cannot be eliminated by any LLM product, so ExecPilot combines model instructions with deterministic screening, least privilege, validation, quarantine, and human approval.</div>
+  </div>
+</section>
+
 <!-- ================= PRIVACY ================= -->
 <section id="privacy" class="privacy-section" style="background:var(--bg); border:none;">
   <div class="container privacy-grid">
@@ -772,7 +809,7 @@ ollama serve</div>
           <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Decision workspace &amp; executive exports</li>
           <!--li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 13l4 4L19 7"/></svg>Windows desktop app</li-->
         </ul>
-        <a href="https://krrish.lemonsqueezy.com/checkout/buy/463fd80b-3a86-4c6a-a68b-15535f71dd88" class="btn btn-primary">Start Pro trial</a>
+        <a href="#" class="btn btn-primary">Get Pro</a>
       </div>
       <div class="price-card" style="display:none">
         <h3>Team</h3>
@@ -845,7 +882,6 @@ ollama serve</div>
     <h2>Stop prompting. Start deciding.</h2>
     <p>Install ExecPilot, connect a model, and run your first recipe in under two minutes.</p>
     <a href="#" class="btn btn-primary btn-lg">Add to Chrome — Free</a>
-    <a href="#" class="btn btn-ghost btn-lg">Download for Windows</a>
   </div>
 </section>
 
