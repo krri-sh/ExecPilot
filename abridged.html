@@ -122,13 +122,13 @@
 <body>
 <div class="app">
   <header class="topbar">
-    <a class="brand" href="" aria-label="ExecPilot home">Exec<span>Pilot</span></a>
+    <a class="brand" href="index1.html" aria-label="ExecPilot home">Exec<span>Pilot</span></a>
     <nav class="topnav" aria-label="ExecPilot navigation">
       <button class="tab active" type="button" data-top-view="recipes">Recipes</button>
       <button class="tab" type="button" data-top-view="skills">Skills</button>
       <a class="tab" href="#bundles">Bundles</a>
-      <a class="tab optional" href="#features">Features</a>
-      <a class="tab optional" href="#pricing">License</a>
+      <a class="tab optional" href="index.html#features">Features</a>
+      <a class="tab optional" href="index.html#pricing">License</a>
     </nav>
   </header>
 
@@ -189,10 +189,10 @@
         <button class="link-btn" type="button" data-buy="complete">Get the complete library</button>
       </article>
     </div>
-    <p class="checkout-note">Checkout buttons are Lemon Squeezy-ready. Until checkout links are connected, enquiries open a pre-addressed email to hello@krri.sh.</p>
+    <p class="checkout-note">Checkout buttons are Lemon Squeezy-ready. Until checkout links are connected, enquiries open a pre-addressed email to help@getexecpilot.com or hello@krri.sh.</p>
   </section>
 
-  <footer><span>ExecPilot protected pack catalog</span><span><a href="">Website</a> · <a href="privacy.html">Privacy Policy</a></span></footer>
+  <footer><span>ExecPilot protected pack catalog</span><span><a href="index1.html">Website</a> · <a href="privacy.html">Privacy Policy</a></span></footer>
 </div>
 
 <dialog id="contact-dialog" aria-labelledby="contact-title">
@@ -200,8 +200,8 @@
     <div class="modal-icon">✦</div>
     <h2 id="contact-title">Unlock this ExecPilot pack</h2>
     <p id="contact-message">Email us for pack availability, licensing, delivery, or a bundle recommendation.</p>
-    <div class="email-box">hello@krri.sh</div>
-    <div class="modal-actions"><button id="close-dialog" class="link-btn" type="button">Not now</button><a id="email-link" class="primary-btn" href="mailto:hello@krri.sh">Email hello@krri.sh</a></div>
+    <div class="email-box">help@getexecpilot.com or hello@krri.sh</div>
+    <div class="modal-actions"><button id="close-dialog" class="link-btn" type="button">Not now</button><a id="email-link" class="primary-btn" href="mailto:help@getexecpilot.com?cc=hello@krri.sh">Email help@getexecpilot.com or hello@krri.sh</a></div>
   </div>
 </dialog>
 
@@ -213,7 +213,7 @@ const $ = selector => document.querySelector(selector);
 const escapeHtml = (value = "") => String(value).replace(/[&<>'"]/g, character => ({"&":"&amp;","<":"&lt;",">":"&gt;","'":"&#39;",'"':"&quot;"}[character]));
 
 // Paste Lemon Squeezy checkout URLs here when products are ready. Empty values use the email enquiry fallback.
-const CHECKOUT_URLS = Object.freeze({ single:"https://krrish.lemonsqueezy.com/checkout/buy/16c5eb5c-5098-419c-a861-11f5dbf446c0", five:"https://krrish.lemonsqueezy.com/checkout/buy/16c5eb5c-5098-419c-a861-11f5dbf446c0", complete:"https://krrish.lemonsqueezy.com/checkout/buy/16c5eb5c-5098-419c-a861-11f5dbf446c0" });
+const CHECKOUT_URLS = Object.freeze({ single:"https://krrish.lemonsqueezy.com/checkout/buy/8c378ece-32c2-4fa3-bee4-1b8a25388630", five:"https://krrish.lemonsqueezy.com/checkout/buy/8c378ece-32c2-4fa3-bee4-1b8a25388630", complete:"https://krrish.lemonsqueezy.com/checkout/buy/8c378ece-32c2-4fa3-bee4-1b8a25388630" });
 const packById = id => PACKS.find(pack => pack.id === id);
 
 function renderDomainNavigation() {
@@ -295,10 +295,10 @@ function openContact(kind = "pack", plan = "single") {
   const checkoutUrl = CHECKOUT_URLS[plan];
   if (checkoutUrl) { window.location.href = checkoutUrl; return; }
   $("#contact-title").textContent = kind === "pack" ? `Get the ${requested}` : `Unlock ${selected?.name || "this protected item"}`;
-  $("#contact-message").textContent = `Email hello@krri.sh to purchase ${requested}, ask about licensing, or request a tailored bundle. We’ll confirm delivery and payment details.`;
+  $("#contact-message").textContent = `Email help@getexecpilot.com or hello@krri.sh to purchase ${requested}, ask about licensing, or request a tailored bundle. We’ll confirm delivery and payment details.`;
   const subject = `ExecPilot enquiry — ${requested}`;
   const body = `Hello,\n\nI’m interested in the ${requested}. Please send me purchase and delivery details.\n\nThank you.`;
-  $("#email-link").href = `mailto:hello@krri.sh?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  $("#email-link").href = `mailto:help@getexecpilot.com?cc=hello@krri.sh&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   $("#contact-dialog").showModal();
 }
 
