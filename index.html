@@ -1025,6 +1025,225 @@ ollama serve</div>
     });
   });
 </script>
+<!-- ExecPilot pull-out video tab -->
+<button
+  id="video-pullout-tab"
+  type="button"
+  data-drive-url="https://drive.google.com/file/d/10hR34UyJ91Bbe6rt2I4YZvHO4rk2mUgC/view?usp=sharing"
+  aria-haspopup="dialog"
+  aria-controls="video-demo-dialog"
+>
+  <span>Watch demo</span>
+</button>
 
+<div id="video-demo-dialog" role="dialog" aria-modal="true" aria-labelledby="video-demo-title" hidden>
+  <div class="video-dialog-card">
+    <div class="video-dialog-header">
+      <h2 id="video-demo-title">See ExecPilot in action</h2>
+      <button
+        id="close-video-dialog"
+        type="button"
+        aria-label="Close video"
+      >
+        &times;
+      </button>
+    </div>
+
+    <div class="video-frame">
+      <iframe
+        id="google-drive-video"
+        title="ExecPilot product demonstration"
+        allow="autoplay; fullscreen"
+        allowfullscreen
+      ></iframe>
+    </div>
+  </div>
+</div>
+
+<style>
+  #video-pullout-tab {
+    position: fixed;
+    left: 0;
+    top: 50%;
+    z-index: 9998;
+    transform: translateY(-50%);
+
+    padding: 18px 10px;
+    border: 0;
+    border-radius: 0 10px 10px 0;
+    background: #006080;
+    color: #fff;
+    font: 700 13px/1.1 "Bricolage Grotesque", "Segoe UI", sans-serif;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+    box-shadow: 4px 0 18px rgba(15, 46, 56, 0.22);
+    transition:
+      padding 160ms ease,
+      background 160ms ease;
+  }
+
+  #video-pullout-tab span {
+    display: block;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+  }
+
+  #video-pullout-tab:hover,
+  #video-pullout-tab:focus-visible {
+    padding-top: 23px;
+    padding-bottom: 23px;
+    background: #004f69;
+  }
+
+  #video-pullout-tab:focus-visible {
+    outline: 3px solid #72d5b7;
+    outline-offset: 3px;
+  }
+
+  #video-demo-dialog {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: rgba(15, 46, 56, 0.72);
+    backdrop-filter: blur(4px);
+  }
+
+  #video-demo-dialog[hidden] { display: none; }
+
+  .video-dialog-card {
+    width: min(920px, calc(100vw - 32px));
+    overflow: hidden;
+    border: 1px solid #cfe4ec;
+    border-radius: 16px;
+    background: #f4fafc;
+    color: #0f2e38;
+    font-family: "Bricolage Grotesque", "Segoe UI", sans-serif;
+    box-shadow: 0 28px 90px rgba(15, 46, 56, 0.32);
+  }
+
+  body.video-modal-open { overflow: hidden; }
+
+  .video-dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 16px 20px;
+  }
+
+  .video-dialog-header h2 {
+    margin: 0;
+    color: #006080;
+    font: 800 21px/1.2 "Bricolage Grotesque", "Segoe UI", sans-serif;
+  }
+
+  #close-video-dialog {
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: #d9edf4;
+    color: #006080;
+    font-size: 26px;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  #close-video-dialog:hover {
+    background: #c7e4ed;
+  }
+
+  .video-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    background: #0f2e38;
+  }
+
+  .video-frame iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  @media (max-width: 600px) {
+    #video-pullout-tab {
+      top: auto;
+      bottom: 100px;
+      transform: none;
+    }
+
+    .video-dialog-header {
+      padding: 13px 15px;
+    }
+
+    .video-dialog-header h2 {
+      font-size: 17px;
+    }
+  }
+</style>
+
+<script>
+  (() => {
+    const tab = document.querySelector("#video-pullout-tab");
+    const dialog = document.querySelector("#video-demo-dialog");
+    const closeButton = document.querySelector("#close-video-dialog");
+    const video = document.querySelector("#google-drive-video");
+    let returnFocus = null;
+
+    function createDrivePreviewUrl(sharedUrl) {
+      // Supports:
+      // drive.google.com/file/d/FILE_ID/view
+      // drive.google.com/open?id=FILE_ID
+      // drive.google.com/uc?id=FILE_ID
+      const pathMatch = sharedUrl.match(/\/file\/d\/([^/?]+)/);
+      const queryMatch = sharedUrl.match(/[?&]id=([^&]+)/);
+      const fileId = pathMatch?.[1] || queryMatch?.[1];
+
+      if (!fileId) {
+        throw new Error("The Google Drive file ID could not be found.");
+      }
+
+      return `https://drive.google.com/file/d/${fileId}/preview`;
+    }
+
+    function closeVideo() {
+      dialog.hidden = true;
+      document.body.classList.remove("video-modal-open");
+      video.removeAttribute("src");
+      returnFocus?.focus();
+    }
+
+    tab.addEventListener("click", () => {
+      try {
+        returnFocus = document.activeElement;
+        video.src = createDrivePreviewUrl(tab.dataset.driveUrl);
+        dialog.hidden = false;
+        document.body.classList.add("video-modal-open");
+        closeButton.focus();
+      } catch (error) {
+        console.error(error);
+        alert("The video link is not configured correctly.");
+      }
+    });
+
+    closeButton.addEventListener("click", closeVideo);
+
+    dialog.addEventListener("click", (event) => {
+      if (event.target === dialog) closeVideo();
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape" && !dialog.hidden) closeVideo();
+    });
+  })();
+</script>
 </body>
 </html>
